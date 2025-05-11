@@ -18,6 +18,12 @@ const BRANDS = [
   "Mercedes", "Nissan", "Opel", "Peugeot", "Renault", "Seat", "Skoda", "Toyota", "Volkswagen", "Volvo"
 ];
 
+// Catégories de véhicules
+const CATEGORIES = [
+  "Berline", "SUV / Crossover", "Break", "Monospace", "Cabriolet", 
+  "Coupé", "4x4", "Citadine", "Utilitaire", "Autre"
+];
+
 const MODELS: { [key: string]: string[] } = {
   "Peugeot": ["108", "208", "2008", "308", "3008", "508", "5008"],
   "Renault": ["Clio", "Captur", "Megane", "Arkana", "Scenic", "Kadjar", "Koleos"],
@@ -76,6 +82,7 @@ const YEARS = () => {
 };
 
 interface FormData {
+  category: string;
   brand: string;
   model: string;
   minYear: string;
@@ -94,6 +101,7 @@ interface FormData {
 const SearchForm = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
+    category: "",
     brand: "",
     model: "",
     minYear: "",
@@ -217,13 +225,30 @@ const SearchForm = () => {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
+                      {/* Catégorie de véhicule */}
+                      <div className="space-y-2">
+                        <Label htmlFor="category">Catégorie de véhicule</Label>
+                        <Select value={formData.category} onValueChange={(value) => handleChange('category', value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionnez une catégorie (optionnel)" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {CATEGORIES.map((category) => (
+                              <SelectItem key={category} value={category}>
+                                {category}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
                       {/* Marque et modèle */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                          <Label htmlFor="brand">Marque</Label>
+                          <Label htmlFor="brand">Marque (optionnel)</Label>
                           <Select value={formData.brand} onValueChange={(value) => handleBrandChange(value)}>
                             <SelectTrigger>
-                              <SelectValue placeholder="Sélectionnez une marque" />
+                              <SelectValue placeholder="Toutes les marques" />
                             </SelectTrigger>
                             <SelectContent>
                               {BRANDS.map((brand) => (
@@ -235,14 +260,14 @@ const SearchForm = () => {
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="model">Modèle</Label>
+                          <Label htmlFor="model">Modèle (optionnel)</Label>
                           <Select 
                             value={formData.model} 
                             onValueChange={(value) => handleChange('model', value)} 
                             disabled={!formData.brand}
                           >
                             <SelectTrigger>
-                              <SelectValue placeholder={formData.brand ? "Sélectionnez un modèle" : "Choisissez d'abord une marque"} />
+                              <SelectValue placeholder={formData.brand ? "Tous les modèles" : "Choisissez d'abord une marque"} />
                             </SelectTrigger>
                             <SelectContent>
                               {availableModels.map((model) => (
@@ -504,10 +529,18 @@ const SearchForm = () => {
                         <h4 className="font-semibold mb-3">Résumé de votre recherche</h4>
 
                         <div className="space-y-3 text-sm">
+                          {formData.category && (
+                            <div className="grid grid-cols-2 gap-1">
+                              <p className="text-gray-500">Catégorie:</p>
+                              <p>{formData.category}</p>
+                            </div>
+                          )}
+                          
                           <div className="grid grid-cols-2 gap-1">
                             <p className="text-gray-500">Véhicule:</p>
                             <p>
-                              {formData.brand} {formData.model}
+                              {formData.brand ? formData.brand : "Toutes marques"} 
+                              {formData.model ? ` ${formData.model}` : ""} 
                               {formData.minYear && formData.maxYear && ` (${formData.minYear} - ${formData.maxYear})`}
                             </p>
                           </div>

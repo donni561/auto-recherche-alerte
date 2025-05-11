@@ -1,286 +1,365 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import MainLayout from '@/components/layouts/MainLayout';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Bell, Users, BarChart, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Briefcase, MapPin, Car, Users } from 'lucide-react';
 
 const Professional = () => {
+  const [activeTab, setActiveTab] = useState('overview');
+  
+  // Données de démonstration pour les demandes récentes
+  const recentRequests = [
+    {
+      id: '1',
+      vehicle: 'SUV / Crossover',
+      brand: 'Peugeot',
+      model: '3008',
+      year: '2020-2023',
+      location: 'Lyon (69)',
+      distance: '30km',
+      budget: '25 000 €',
+      date: 'Aujourd\'hui',
+    },
+    {
+      id: '2',
+      vehicle: 'Berline',
+      brand: 'Toutes marques',
+      model: '',
+      year: '2019-2023',
+      location: 'Paris (75)',
+      distance: '20km',
+      budget: '18 000 €',
+      date: 'Hier',
+    },
+    {
+      id: '3',
+      vehicle: 'Citadine',
+      brand: 'Renault',
+      model: 'Clio',
+      year: '2018-2023',
+      location: 'Marseille (13)',
+      distance: '25km',
+      budget: '15 000 €',
+      date: 'Il y a 2 jours',
+    },
+    {
+      id: '4',
+      vehicle: 'Break',
+      brand: 'Volkswagen',
+      model: 'Passat',
+      year: '2017-2023',
+      location: 'Bordeaux (33)',
+      distance: '40km',
+      budget: '22 000 €',
+      date: 'Il y a 3 jours',
+    },
+  ];
+
+  // Données de démonstration pour les statistiques
+  const stats = {
+    totalRequests: 127,
+    newRequests: 18,
+    contactRate: '78%',
+    satisfactionRate: '92%',
+  };
+
   return (
     <MainLayout>
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-car-blue to-blue-600 text-white py-16">
+      <div className="py-12 bg-gray-50 min-h-screen">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl font-bold mb-6">Espace Professionnel</h1>
-            <p className="text-xl mb-8">
-              Rejoignez notre réseau et connectez-vous directement avec des acheteurs qualifiés qui recherchent activement des véhicules.
-            </p>
-            <Button className="car-button-gradient text-white px-8 py-6 text-lg">
-              Devenir partenaire
-            </Button>
-          </div>
-        </div>
-      </div>
+          <div className="flex flex-col md:flex-row gap-8">
+            {/* Sidebar / Menu */}
+            <div className="w-full md:w-64 space-y-6">
+              <div className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-semibold mb-4 flex items-center">
+                  <Briefcase className="mr-2 h-5 w-5 text-car-blue" />
+                  Espace Pro
+                </h2>
+                <div className="space-y-2">
+                  <Button 
+                    variant={activeTab === 'overview' ? "default" : "ghost"}
+                    className="w-full justify-start"
+                    onClick={() => setActiveTab('overview')}
+                  >
+                    Tableau de bord
+                  </Button>
+                  <Button 
+                    variant={activeTab === 'requests' ? "default" : "ghost"}
+                    className="w-full justify-start"
+                    onClick={() => setActiveTab('requests')}
+                  >
+                    Demandes
+                  </Button>
+                  <Button 
+                    variant={activeTab === 'settings' ? "default" : "ghost"}
+                    className="w-full justify-start"
+                    onClick={() => setActiveTab('settings')}
+                  >
+                    Paramètres
+                  </Button>
+                </div>
+              </div>
 
-      {/* Features */}
-      <div className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12">Pourquoi rejoindre notre plateforme ?</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center text-center p-4">
-                    <div className="h-16 w-16 rounded-full car-select-gradient flex items-center justify-center mb-4">
-                      <Search className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-3">Acheteurs ciblés</h3>
-                    <p className="text-gray-600">
-                      Accédez à une base de clients qualifiés qui recherchent activement des véhicules correspondant à votre stock.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center text-center p-4">
-                    <div className="h-16 w-16 rounded-full car-select-gradient flex items-center justify-center mb-4">
-                      <Bell className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-3">Alertes en temps réel</h3>
-                    <p className="text-gray-600">
-                      Recevez des notifications instantanées lorsque des acheteurs recherchent des véhicules dans votre zone.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="hover:shadow-lg transition-shadow">
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center text-center p-4">
-                    <div className="h-16 w-16 rounded-full car-select-gradient flex items-center justify-center mb-4">
-                      <BarChart className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-3">Analyses détaillées</h3>
-                    <p className="text-gray-600">
-                      Suivez vos performances et analysez les tendances du marché grâce à notre tableau de bord complet.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* How it Works */}
-      <div className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12">Comment ça fonctionne</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16">
-              <div className="flex">
-                <div className="flex-shrink-0 mr-4">
-                  <div className="h-10 w-10 rounded-full bg-car-blue text-white flex items-center justify-center font-bold text-lg">
-                    1
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold mb-3">Inscrivez-vous en tant que professionnel</h3>
-                  <p className="text-gray-600">
-                    Créez votre compte professionnel, renseignez vos informations et définissez votre zone d'activité.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex">
-                <div className="flex-shrink-0 mr-4">
-                  <div className="h-10 w-10 rounded-full bg-car-blue text-white flex items-center justify-center font-bold text-lg">
-                    2
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold mb-3">Recevez des alertes</h3>
-                  <p className="text-gray-600">
-                    Vous êtes notifié par email et via notre application dès qu'un particulier recherche un véhicule dans votre zone.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex">
-                <div className="flex-shrink-0 mr-4">
-                  <div className="h-10 w-10 rounded-full bg-car-blue text-white flex items-center justify-center font-bold text-lg">
-                    3
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold mb-3">Contactez l'acheteur potentiel</h3>
-                  <p className="text-gray-600">
-                    Si vous disposez d'un véhicule correspondant aux critères, contactez directement l'acheteur via notre plateforme.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex">
-                <div className="flex-shrink-0 mr-4">
-                  <div className="h-10 w-10 rounded-full bg-car-blue text-white flex items-center justify-center font-bold text-lg">
-                    4
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold mb-3">Concluez la vente</h3>
-                  <p className="text-gray-600">
-                    Organisez une visite, proposez un essai et finalisez la vente directement avec le client.
-                  </p>
-                </div>
+              <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg shadow p-6 border border-blue-100">
+                <h3 className="font-medium mb-2">Accès premium</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Accédez à plus de demandes et des outils avancés pour développer votre activité.
+                </p>
+                <Button className="w-full car-button-gradient text-white">
+                  Découvrir nos offres
+                </Button>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Pricing */}
-      <div className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-4">Nos formules</h2>
-            <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
-              Choisissez la formule qui correspond le mieux à votre activité et à vos besoins.
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="hover:shadow-lg transition-shadow border-t-4 border-t-gray-300">
-                <CardContent className="p-6">
-                  <div className="text-center mb-6">
-                    <h3 className="text-xl font-bold mb-2">Starter</h3>
-                    <div className="text-3xl font-bold mb-1">99€<span className="text-sm font-normal text-gray-500">/mois</span></div>
-                    <p className="text-gray-500">Pour débuter</p>
+            {/* Main Content */}
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold mb-6">Bienvenue sur votre espace professionnel</h1>
+
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="overview">Tableau de bord</TabsTrigger>
+                  <TabsTrigger value="requests">Demandes</TabsTrigger>
+                  <TabsTrigger value="settings">Paramètres</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="overview" className="space-y-6 mt-6">
+                  {/* Statistics Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="text-2xl font-bold">{stats.totalRequests}</div>
+                        <p className="text-sm text-muted-foreground">Demandes totales</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="text-2xl font-bold">{stats.newRequests}</div>
+                        <p className="text-sm text-muted-foreground">Nouvelles demandes</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="text-2xl font-bold">{stats.contactRate}</div>
+                        <p className="text-sm text-muted-foreground">Taux de contact</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="text-2xl font-bold">{stats.satisfactionRate}</div>
+                        <p className="text-sm text-muted-foreground">Satisfaction client</p>
+                      </CardContent>
+                    </Card>
                   </div>
-                  <ul className="space-y-3 mb-8">
-                    <li className="flex items-center">
-                      <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span>Jusqu'à 20 alertes par mois</span>
-                    </li>
-                    <li className="flex items-center">
-                      <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span>1 zone géographique</span>
-                    </li>
-                    <li className="flex items-center">
-                      <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span>Support par email</span>
-                    </li>
-                  </ul>
-                  <Button className="w-full">Choisir</Button>
-                </CardContent>
-              </Card>
-              
-              <Card className="hover:shadow-lg transition-shadow border-t-4 border-t-car-orange relative">
-                <div className="absolute top-0 right-0 bg-car-orange text-white text-xs px-3 py-1 rounded-bl font-semibold">
-                  POPULAIRE
-                </div>
-                <CardContent className="p-6">
-                  <div className="text-center mb-6">
-                    <h3 className="text-xl font-bold mb-2">Pro</h3>
-                    <div className="text-3xl font-bold mb-1">199€<span className="text-sm font-normal text-gray-500">/mois</span></div>
-                    <p className="text-gray-500">Pour les professionnels</p>
-                  </div>
-                  <ul className="space-y-3 mb-8">
-                    <li className="flex items-center">
-                      <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span>Alertes illimitées</span>
-                    </li>
-                    <li className="flex items-center">
-                      <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span>3 zones géographiques</span>
-                    </li>
-                    <li className="flex items-center">
-                      <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span>Support prioritaire</span>
-                    </li>
-                    <li className="flex items-center">
-                      <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span>Statistiques avancées</span>
-                    </li>
-                  </ul>
-                  <Button className="w-full car-button-gradient text-white">Choisir</Button>
-                </CardContent>
-              </Card>
-              
-              <Card className="hover:shadow-lg transition-shadow border-t-4 border-t-car-blue">
-                <CardContent className="p-6">
-                  <div className="text-center mb-6">
-                    <h3 className="text-xl font-bold mb-2">Enterprise</h3>
-                    <div className="text-3xl font-bold mb-1">399€<span className="text-sm font-normal text-gray-500">/mois</span></div>
-                    <p className="text-gray-500">Pour les grandes structures</p>
-                  </div>
-                  <ul className="space-y-3 mb-8">
-                    <li className="flex items-center">
-                      <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span>Alertes illimitées</span>
-                    </li>
-                    <li className="flex items-center">
-                      <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span>Zones illimitées</span>
-                    </li>
-                    <li className="flex items-center">
-                      <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span>Support dédié</span>
-                    </li>
-                    <li className="flex items-center">
-                      <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span>API personnalisée</span>
-                    </li>
-                    <li className="flex items-center">
-                      <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span>Intégration CRM</span>
-                    </li>
-                  </ul>
-                  <Button className="w-full" variant="outline">Nous contacter</Button>
-                </CardContent>
-              </Card>
+
+                  {/* Recent Requests */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-xl">Demandes récentes</CardTitle>
+                      <CardDescription>
+                        Consultez les dernières recherches de véhicules dans votre zone
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {recentRequests.map(request => (
+                          <Card key={request.id} className="bg-gray-50">
+                            <CardContent className="p-4">
+                              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                                <div className="mb-3 md:mb-0">
+                                  <div className="flex items-center mb-1">
+                                    <Car className="h-4 w-4 mr-1 text-car-blue" />
+                                    <span className="font-medium">{request.vehicle} - {request.brand} {request.model}</span>
+                                  </div>
+                                  <div className="flex items-center text-sm text-gray-500">
+                                    <MapPin className="h-3 w-3 mr-1" />
+                                    <span>{request.location} ({request.distance})</span>
+                                  </div>
+                                </div>
+                                <div className="flex flex-col md:items-end">
+                                  <span className="font-medium">{request.budget}</span>
+                                  <span className="text-sm text-gray-500">{request.date}</span>
+                                </div>
+                              </div>
+                              <div className="mt-3 flex justify-end">
+                                <Button size="sm" variant="outline" className="mr-2">Voir détails</Button>
+                                <Button size="sm" className="car-button-gradient text-white">Contacter</Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      <Button variant="outline" className="w-full">Voir toutes les demandes</Button>
+                    </CardFooter>
+                  </Card>
+                </TabsContent>
+                
+                <TabsContent value="requests" className="mt-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Rechercher des demandes</CardTitle>
+                      <CardDescription>
+                        Filtrez les demandes par critères pour trouver celles qui correspondent à votre inventaire
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div className="space-y-2">
+                          <Label>Catégorie</Label>
+                          <Select>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Toutes les catégories" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">Toutes les catégories</SelectItem>
+                              <SelectItem value="suv">SUV / Crossover</SelectItem>
+                              <SelectItem value="berline">Berline</SelectItem>
+                              <SelectItem value="citadine">Citadine</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Marque</Label>
+                          <Select>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Toutes les marques" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">Toutes les marques</SelectItem>
+                              <SelectItem value="peugeot">Peugeot</SelectItem>
+                              <SelectItem value="renault">Renault</SelectItem>
+                              <SelectItem value="volkswagen">Volkswagen</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Département</Label>
+                          <Select>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Tous les départements" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">Tous les départements</SelectItem>
+                              <SelectItem value="75">Paris (75)</SelectItem>
+                              <SelectItem value="69">Rhône (69)</SelectItem>
+                              <SelectItem value="33">Gironde (33)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="text-left pb-2">Véhicule</th>
+                              <th className="text-left pb-2">Localisation</th>
+                              <th className="text-left pb-2">Budget</th>
+                              <th className="text-left pb-2">Date</th>
+                              <th className="text-right pb-2">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {recentRequests.map(request => (
+                              <tr key={request.id} className="border-b">
+                                <td className="py-3 pr-4">
+                                  <div>
+                                    <div className="font-medium">{request.vehicle}</div>
+                                    <div className="text-sm text-gray-500">{request.brand} {request.model}</div>
+                                  </div>
+                                </td>
+                                <td className="py-3 pr-4">
+                                  <div>{request.location}</div>
+                                  <div className="text-sm text-gray-500">{request.distance}</div>
+                                </td>
+                                <td className="py-3 pr-4 font-medium">{request.budget}</td>
+                                <td className="py-3 pr-4">{request.date}</td>
+                                <td className="py-3 text-right">
+                                  <Button size="sm" className="car-button-gradient text-white">Contacter</Button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+                
+                <TabsContent value="settings" className="mt-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Paramètres du compte</CardTitle>
+                      <CardDescription>
+                        Gérez les informations de votre concession et vos préférences de notification
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="dealerName">Nom de la concession</Label>
+                        <Input id="dealerName" placeholder="Entrez le nom de votre concession" />
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="email">Email</Label>
+                          <Input id="email" type="email" placeholder="votre@email.com" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="phone">Téléphone</Label>
+                          <Input id="phone" placeholder="Ex: 06 12 34 56 78" />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="address">Adresse</Label>
+                        <Input id="address" placeholder="Adresse de votre concession" />
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="zipcode">Code postal</Label>
+                          <Input id="zipcode" placeholder="Ex: 75001" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="city">Ville</Label>
+                          <Input id="city" placeholder="Ex: Paris" />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="searchRadius">Rayon de recherche</Label>
+                        <Select>
+                          <SelectTrigger id="searchRadius">
+                            <SelectValue placeholder="Sélectionnez un rayon" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="10">10 km</SelectItem>
+                            <SelectItem value="25">25 km</SelectItem>
+                            <SelectItem value="50">50 km</SelectItem>
+                            <SelectItem value="100">100 km</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Distance maximale pour recevoir les demandes des acheteurs
+                        </p>
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      <Button variant="outline" className="mr-2">Annuler</Button>
+                      <Button className="car-button-gradient text-white">Enregistrer les modifications</Button>
+                    </CardFooter>
+                  </Card>
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* CTA */}
-      <div className="py-16 car-select-gradient text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Prêt à développer votre activité ?</h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Rejoignez notre réseau de professionnels et commencez à recevoir des demandes ciblées dès aujourd'hui.
-          </p>
-          <Button className="car-button-gradient text-white px-8 py-6 text-lg">
-            Devenir partenaire maintenant
-          </Button>
         </div>
       </div>
     </MainLayout>
