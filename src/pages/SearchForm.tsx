@@ -1,607 +1,383 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layouts/MainLayout';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
+import { toast } from 'sonner';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { MapPin, Car } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Textarea } from '@/components/ui/textarea';
 
-// Mock data
-const BRANDS = [
-  "Audi", "BMW", "Citroën", "Dacia", "Fiat", "Ford", "Honda", "Hyundai", "Kia", 
-  "Mercedes", "Nissan", "Opel", "Peugeot", "Renault", "Seat", "Skoda", "Toyota", "Volkswagen", "Volvo"
-];
-
-// Catégories de véhicules
-const CATEGORIES = [
-  "Berline", "SUV / Crossover", "Break", "Monospace", "Cabriolet", 
-  "Coupé", "4x4", "Citadine", "Utilitaire", "Autre"
-];
-
-const MODELS: { [key: string]: string[] } = {
-  "Peugeot": ["108", "208", "2008", "308", "3008", "508", "5008"],
-  "Renault": ["Clio", "Captur", "Megane", "Arkana", "Scenic", "Kadjar", "Koleos"],
-  "Volkswagen": ["Polo", "Golf", "T-Roc", "Tiguan", "Passat", "Touran", "ID.3", "ID.4"],
-  "Audi": ["A1", "A3", "A4", "A5", "A6", "Q3", "Q5", "Q7", "e-tron"],
-  "BMW": ["Serie 1", "Serie 3", "Serie 5", "X1", "X3", "X5", "iX"],
-  "Mercedes": ["Classe A", "Classe C", "Classe E", "GLA", "GLC", "GLE"],
-};
-
-// Options disponibles
-const OPTIONS = [
-  { id: "gps", label: "GPS / Navigation" },
-  { id: "camera", label: "Caméra de recul" },
-  { id: "parking", label: "Aide au stationnement" },
-  { id: "bluetooth", label: "Bluetooth" },
-  { id: "leather", label: "Sièges en cuir" },
-  { id: "sunroof", label: "Toit ouvrant" },
-  { id: "climateControl", label: "Climatisation automatique" },
-  { id: "alloyWheels", label: "Jantes alliage" },
-  { id: "cruiseControl", label: "Régulateur de vitesse" },
-  { id: "electricSeats", label: "Sièges électriques" },
-];
-
-// French departments for the region selection
-const DEPARTMENTS = [
-  "01 - Ain", "02 - Aisne", "03 - Allier", "04 - Alpes-de-Haute-Provence", "05 - Hautes-Alpes",
-  "06 - Alpes-Maritimes", "07 - Ardèche", "08 - Ardennes", "09 - Ariège", "10 - Aube",
-  "11 - Aude", "12 - Aveyron", "13 - Bouches-du-Rhône", "14 - Calvados", "15 - Cantal",
-  "16 - Charente", "17 - Charente-Maritime", "18 - Cher", "19 - Corrèze", "2A - Corse-du-Sud",
-  "2B - Haute-Corse", "21 - Côte-d'Or", "22 - Côtes-d'Armor", "23 - Creuse", "24 - Dordogne",
-  "25 - Doubs", "26 - Drôme", "27 - Eure", "28 - Eure-et-Loir", "29 - Finistère",
-  "30 - Gard", "31 - Haute-Garonne", "32 - Gers", "33 - Gironde", "34 - Hérault",
-  "35 - Ille-et-Vilaine", "36 - Indre", "37 - Indre-et-Loire", "38 - Isère", "39 - Jura",
-  "40 - Landes", "41 - Loir-et-Cher", "42 - Loire", "43 - Haute-Loire", "44 - Loire-Atlantique",
-  "45 - Loiret", "46 - Lot", "47 - Lot-et-Garonne", "48 - Lozère", "49 - Maine-et-Loire",
-  "50 - Manche", "51 - Marne", "52 - Haute-Marne", "53 - Mayenne", "54 - Meurthe-et-Moselle",
-  "55 - Meuse", "56 - Morbihan", "57 - Moselle", "58 - Nièvre", "59 - Nord",
-  "60 - Oise", "61 - Orne", "62 - Pas-de-Calais", "63 - Puy-de-Dôme", "64 - Pyrénées-Atlantiques",
-  "65 - Hautes-Pyrénées", "66 - Pyrénées-Orientales", "67 - Bas-Rhin", "68 - Haut-Rhin", "69 - Rhône",
-  "70 - Haute-Saône", "71 - Saône-et-Loire", "72 - Sarthe", "73 - Savoie", "74 - Haute-Savoie",
-  "75 - Paris", "76 - Seine-Maritime", "77 - Seine-et-Marne", "78 - Yvelines", "79 - Deux-Sèvres",
-  "80 - Somme", "81 - Tarn", "82 - Tarn-et-Garonne", "83 - Var", "84 - Vaucluse",
-  "85 - Vendée", "86 - Vienne", "87 - Haute-Vienne", "88 - Vosges", "89 - Yonne",
-  "90 - Territoire de Belfort", "91 - Essonne", "92 - Hauts-de-Seine", "93 - Seine-Saint-Denis", "94 - Val-de-Marne",
-  "95 - Val-d'Oise"
-];
-
-// Générer les années (de l'année courante jusqu'à 20 ans en arrière)
-const YEARS = () => {
-  const currentYear = new Date().getFullYear();
-  const years = [];
-  for (let i = currentYear; i >= currentYear - 20; i--) {
-    years.push(i.toString());
-  }
-  return years;
-};
-
-interface FormData {
-  category: string;
-  brand: string;
-  model: string;
-  minYear: string;
-  maxYear: string;
-  maxKilometers: number;
-  budget: number;
-  options: string[];
-  region: string;
-  city: string;
-  radius: number;
-  email: string;
-  phone: string;
-  name: string;
-}
+// Import car brands and models data
+import { carBrands, carModels, vehicleCategories } from '@/data/carData';
 
 const SearchForm = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<FormData>({
-    category: "",
-    brand: "",
-    model: "",
-    minYear: "",
-    maxYear: "",
-    maxKilometers: 100000,
-    budget: 20000,
-    options: [],
-    region: "",
-    city: "",
-    radius: 50,
-    email: "",
-    phone: "",
-    name: "",
+
+  // Form state
+  const [category, setCategory] = useState('');
+  const [brand, setBrand] = useState('');
+  const [model, setModel] = useState('');
+  const [minYear, setMinYear] = useState(2010);
+  const [maxYear, setMaxYear] = useState(2023);
+  const [minPrice, setMinPrice] = useState(5000);
+  const [maxPrice, setMaxPrice] = useState(50000);
+  const [maxMileage, setMaxMileage] = useState(150000);
+  const [searchRadius, setSearchRadius] = useState(50);
+  const [location, setLocation] = useState('');
+  const [searchOption, setSearchOption] = useState('region');
+  const [additionalComments, setAdditionalComments] = useState('');
+  
+  // Options
+  const [options, setOptions] = useState({
+    airConditioning: false,
+    leatherSeats: false,
+    sunroof: false,
+    navigation: false,
+    bluetooth: false,
+    parkingSensors: false,
+    electricWindows: false,
+    heatedSeats: false,
   });
 
-  const [currentStep, setCurrentStep] = useState(1);
-  const [availableModels, setAvailableModels] = useState<string[]>([]);
-
-  // Gérer le changement de marque pour mettre à jour les modèles disponibles
-  const handleBrandChange = (value: string) => {
-    setFormData({ ...formData, brand: value, model: "" });
-    setAvailableModels(MODELS[value] || []);
+  const handleOptionChange = (option) => {
+    setOptions({
+      ...options,
+      [option]: !options[option],
+    });
   };
 
-  // Gérer les changements dans le formulaire
-  const handleChange = (field: keyof FormData, value: any) => {
-    setFormData({ ...formData, [field]: value });
-  };
+  // Filtered models based on selected brand
+  const filteredModels = brand 
+    ? carModels.filter((item) => item.brand === brand) 
+    : [];
 
-  // Gérer les options (checkbox)
-  const handleOptionToggle = (optionId: string, checked: boolean) => {
-    if (checked) {
-      setFormData({ ...formData, options: [...formData.options, optionId] });
-    } else {
-      setFormData({
-        ...formData,
-        options: formData.options.filter(id => id !== optionId)
-      });
-    }
-  };
-
-  // Gérer la soumission du formulaire
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Normally this would send the data to the backend
-    console.log("Submitting form data:", formData);
+    // Form validation
+    if (!category) {
+      toast.error('Veuillez choisir une catégorie de véhicule');
+      return;
+    }
+    
+    if (searchOption === 'region' && !location) {
+      toast.error('Veuillez indiquer votre localisation');
+      return;
+    }
+
+    // Construct search data object
+    const searchData = {
+      category,
+      brand,
+      model,
+      yearRange: [minYear, maxYear],
+      priceRange: [minPrice, maxPrice],
+      maxMileage,
+      searchRadius: searchOption === 'france' ? 'Toute la France' : searchRadius,
+      location: searchOption === 'france' ? 'Toute la France' : location,
+      options: Object.keys(options).filter(key => options[key]),
+      additionalComments
+    };
+    
+    // Save search data in session storage
+    sessionStorage.setItem('searchData', JSON.stringify(searchData));
     
     // Show success message
-    toast({
-      title: "Recherche envoyée !",
-      description: "Votre recherche a été diffusée auprès des professionnels de votre région.",
-    });
+    toast.success('Votre recherche a été enregistrée !');
     
     // Redirect to confirmation page
-    navigate("/confirmation");
-  };
-
-  // Passer à l'étape suivante
-  const nextStep = () => {
-    setCurrentStep(currentStep + 1);
-    // Scroll to top of page
-    window.scrollTo(0, 0);
-  };
-
-  // Revenir à l'étape précédente
-  const prevStep = () => {
-    setCurrentStep(currentStep - 1);
-    // Scroll to top of page
-    window.scrollTo(0, 0);
+    navigate('/confirmation');
   };
 
   return (
     <MainLayout>
-      <div className="py-12 bg-gray-50">
+      <div className="bg-gray-50 py-10">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-3xl font-bold mb-2 text-center">Recherche personnalisée</h1>
-            <p className="text-gray-600 mb-8 text-center">
-              Décrivez le véhicule que vous recherchez et nous alerterons les professionnels dans votre région
-            </p>
-
-            {/* Progress Steps */}
-            <div className="flex items-center justify-center mb-8">
-              <div className={`flex items-center ${currentStep >= 1 ? 'text-car-blue' : 'text-gray-400'}`}>
-                <div className={`rounded-full h-8 w-8 flex items-center justify-center border-2 
-                ${currentStep >= 1 ? 'border-car-blue bg-car-blue text-white' : 'border-gray-400'}`}>
-                  1
-                </div>
-                <span className="ml-2 font-medium">Véhicule</span>
-              </div>
-              <div className={`w-12 h-1 mx-2 ${currentStep >= 2 ? 'bg-car-blue' : 'bg-gray-300'}`}></div>
-              <div className={`flex items-center ${currentStep >= 2 ? 'text-car-blue' : 'text-gray-400'}`}>
-                <div className={`rounded-full h-8 w-8 flex items-center justify-center border-2 
-                ${currentStep >= 2 ? 'border-car-blue bg-car-blue text-white' : 'border-gray-400'}`}>
-                  2
-                </div>
-                <span className="ml-2 font-medium">Localisation</span>
-              </div>
-              <div className={`w-12 h-1 mx-2 ${currentStep >= 3 ? 'bg-car-blue' : 'bg-gray-300'}`}></div>
-              <div className={`flex items-center ${currentStep >= 3 ? 'text-car-blue' : 'text-gray-400'}`}>
-                <div className={`rounded-full h-8 w-8 flex items-center justify-center border-2 
-                ${currentStep >= 3 ? 'border-car-blue bg-car-blue text-white' : 'border-gray-400'}`}>
-                  3
-                </div>
-                <span className="ml-2 font-medium">Confirmation</span>
-              </div>
-            </div>
-
-            <form onSubmit={handleSubmit}>
-              <Card className="shadow-md">
-                {currentStep === 1 && (
-                  <>
-                    <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <Car className="mr-2 h-6 w-6" />
-                        Caractéristiques du véhicule
-                      </CardTitle>
-                      <CardDescription>
-                        Sélectionnez les critères pour le véhicule que vous recherchez
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      {/* Catégorie de véhicule */}
-                      <div className="space-y-2">
-                        <Label htmlFor="category">Catégorie de véhicule</Label>
-                        <Select value={formData.category} onValueChange={(value) => handleChange('category', value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Sélectionnez une catégorie (optionnel)" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {CATEGORIES.map((category) => (
-                              <SelectItem key={category} value={category}>
-                                {category}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Marque et modèle */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="brand">Marque (optionnel)</Label>
-                          <Select value={formData.brand} onValueChange={(value) => handleBrandChange(value)}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Toutes les marques" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {BRANDS.map((brand) => (
-                                <SelectItem key={brand} value={brand}>
-                                  {brand}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="model">Modèle (optionnel)</Label>
-                          <Select 
-                            value={formData.model} 
-                            onValueChange={(value) => handleChange('model', value)} 
-                            disabled={!formData.brand}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder={formData.brand ? "Tous les modèles" : "Choisissez d'abord une marque"} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {availableModels.map((model) => (
-                                <SelectItem key={model} value={model}>
-                                  {model}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      {/* Années */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="minYear">Année minimum</Label>
-                          <Select value={formData.minYear} onValueChange={(value) => handleChange('minYear', value)}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Sélectionnez une année" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {YEARS().map((year) => (
-                                <SelectItem key={year} value={year}>
-                                  {year}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="maxYear">Année maximum</Label>
-                          <Select value={formData.maxYear} onValueChange={(value) => handleChange('maxYear', value)}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Sélectionnez une année" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {YEARS().map((year) => (
-                                <SelectItem key={year} value={year}>
-                                  {year}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      {/* Kilométrage et Budget */}
-                      <div className="space-y-6">
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <Label htmlFor="maxKilometers">Kilométrage maximum</Label>
-                            <span className="text-sm">{formData.maxKilometers.toLocaleString()} km</span>
-                          </div>
-                          <Slider
-                            id="maxKilometers"
-                            min={0}
-                            max={300000}
-                            step={5000}
-                            defaultValue={[100000]}
-                            value={[formData.maxKilometers]}
-                            onValueChange={([value]) => handleChange('maxKilometers', value)}
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="flex justify-between">
-                            <Label htmlFor="budget">Budget maximum</Label>
-                            <span className="text-sm">{formData.budget.toLocaleString()} €</span>
-                          </div>
-                          <Slider
-                            id="budget"
-                            min={1000}
-                            max={100000}
-                            step={1000}
-                            defaultValue={[20000]}
-                            value={[formData.budget]}
-                            onValueChange={([value]) => handleChange('budget', value)}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Options */}
-                      <div className="space-y-4">
-                        <Label className="text-base">Options souhaitées</Label>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {OPTIONS.map((option) => (
-                            <div key={option.id} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={option.id}
-                                checked={formData.options.includes(option.id)}
-                                onCheckedChange={(checked) => handleOptionToggle(option.id, checked as boolean)}
-                              />
-                              <label
-                                htmlFor={option.id}
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                              >
-                                {option.label}
-                              </label>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button 
-                        className="car-button-gradient text-white ml-auto"
-                        type="button" 
-                        onClick={nextStep}
+          <Card className="max-w-4xl mx-auto">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-car-blue">
+                Trouver votre véhicule idéal
+              </CardTitle>
+              <CardDescription>
+                Remplissez ce formulaire pour que les professionnels près de chez vous vous proposent des véhicules correspondant à vos critères.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Vehicle Category */}
+                  <div className="space-y-2">
+                    <Label htmlFor="category" className="text-base font-medium">
+                      Catégorie de véhicule <span className="text-red-500">*</span>
+                    </Label>
+                    <Select 
+                      value={category} 
+                      onValueChange={setCategory}
+                    >
+                      <SelectTrigger id="category" className="bg-white">
+                        <SelectValue placeholder="Choisir une catégorie" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {vehicleCategories.map((category) => (
+                          <SelectItem key={category.value} value={category.value}>
+                            {category.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                
+                  {/* Brand */}
+                  <div className="space-y-2">
+                    <Label htmlFor="brand" className="text-base font-medium">
+                      Marque
+                    </Label>
+                    <Select 
+                      value={brand} 
+                      onValueChange={(value) => {
+                        setBrand(value);
+                        setModel('');
+                      }}
+                    >
+                      <SelectTrigger id="brand" className="bg-white">
+                        <SelectValue placeholder="Toutes les marques" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Toutes les marques</SelectItem>
+                        {carBrands.map((brand) => (
+                          <SelectItem key={brand.value} value={brand.value}>
+                            {brand.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                
+                  {/* Model - Only shown if brand is selected */}
+                  {brand && (
+                    <div className="space-y-2">
+                      <Label htmlFor="model" className="text-base font-medium">
+                        Modèle
+                      </Label>
+                      <Select 
+                        value={model} 
+                        onValueChange={setModel}
                       >
-                        Suivant
-                      </Button>
-                    </CardFooter>
-                  </>
-                )}
+                        <SelectTrigger id="model" className="bg-white">
+                          <SelectValue placeholder="Tous les modèles" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Tous les modèles</SelectItem>
+                          {filteredModels.map((model) => (
+                            <SelectItem key={model.value} value={model.value}>
+                              {model.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
 
-                {currentStep === 2 && (
-                  <>
-                    <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <MapPin className="mr-2 h-6 w-6" />
-                        Zone de recherche
-                      </CardTitle>
-                      <CardDescription>
-                        Indiquez votre localisation pour alerter les professionnels dans votre région
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      {/* Département et Ville */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="region">Département</Label>
-                          <Select value={formData.region} onValueChange={(value) => handleChange('region', value)}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Sélectionnez un département" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {DEPARTMENTS.map((dept) => (
-                                <SelectItem key={dept} value={dept}>
-                                  {dept}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="city">Ville</Label>
-                          <Input 
-                            id="city" 
-                            placeholder="Ex: Lyon, Paris, Nantes..." 
-                            value={formData.city}
-                            onChange={(e) => handleChange('city', e.target.value)}
-                          />
-                        </div>
-                      </div>
+                {/* Year Range */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <Label className="text-base font-medium">Année</Label>
+                    <div className="text-sm text-car-blue font-medium">
+                      {minYear} - {maxYear}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="minYear">Année min</Label>
+                      <Select value={String(minYear)} onValueChange={(value) => setMinYear(Number(value))}>
+                        <SelectTrigger id="minYear" className="bg-white">
+                          <SelectValue placeholder="Année min" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 24 }, (_, i) => 2000 + i).map((year) => (
+                            <SelectItem key={year} value={String(year)}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="maxYear">Année max</Label>
+                      <Select value={String(maxYear)} onValueChange={(value) => setMaxYear(Number(value))}>
+                        <SelectTrigger id="maxYear" className="bg-white">
+                          <SelectValue placeholder="Année max" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 24 }, (_, i) => 2000 + i).map((year) => (
+                            <SelectItem key={year} value={String(year)}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
 
-                      {/* Rayon de recherche */}
+                {/* Price Range */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <Label className="text-base font-medium">Budget</Label>
+                    <div className="text-sm text-car-blue font-medium">
+                      {minPrice.toLocaleString()} € - {maxPrice.toLocaleString()} €
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="minPrice">Prix min</Label>
+                      <Input
+                        id="minPrice"
+                        type="number"
+                        value={minPrice}
+                        className="bg-white"
+                        onChange={(e) => setMinPrice(Number(e.target.value))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="maxPrice">Prix max</Label>
+                      <Input
+                        id="maxPrice"
+                        type="number"
+                        value={maxPrice}
+                        className="bg-white"
+                        onChange={(e) => setMaxPrice(Number(e.target.value))}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mileage */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="mileage" className="text-base font-medium">
+                      Kilométrage max
+                    </Label>
+                    <span className="text-sm text-car-blue font-medium">{maxMileage.toLocaleString()} km</span>
+                  </div>
+                  <Slider
+                    id="mileage"
+                    min={0}
+                    max={300000}
+                    step={5000}
+                    value={[maxMileage]}
+                    onValueChange={(values) => setMaxMileage(values[0])}
+                  />
+                </div>
+
+                {/* Search Area */}
+                <div className="space-y-4">
+                  <Label className="text-base font-medium">Zone de recherche</Label>
+                  <RadioGroup value={searchOption} onValueChange={setSearchOption} className="flex flex-col space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="france" id="france" />
+                      <Label htmlFor="france">Toute la France</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="region" id="region" />
+                      <Label htmlFor="region">Recherche régionale</Label>
+                    </div>
+                  </RadioGroup>
+                  
+                  {searchOption === 'region' && (
+                    <div className="grid md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <div className="flex justify-between">
+                        <Label htmlFor="location">Localisation</Label>
+                        <Input
+                          id="location"
+                          type="text"
+                          placeholder="Ville ou code postal"
+                          className="bg-white"
+                          value={location}
+                          onChange={(e) => setLocation(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
                           <Label htmlFor="radius">Rayon de recherche</Label>
-                          <span className="text-sm">{formData.radius} km</span>
+                          <span className="text-sm text-car-blue font-medium">{searchRadius} km</span>
                         </div>
                         <Slider
                           id="radius"
                           min={10}
                           max={200}
                           step={10}
-                          defaultValue={[50]}
-                          value={[formData.radius]}
-                          onValueChange={([value]) => handleChange('radius', value)}
+                          value={[searchRadius]}
+                          onValueChange={(values) => setSearchRadius(values[0])}
                         />
                       </div>
+                    </div>
+                  )}
+                </div>
 
-                      {/* Zone de recherche (pseudo carte) */}
-                      <div className="p-4 bg-gray-100 rounded-lg text-center">
-                        <p className="text-sm text-gray-500 mb-2">Aperçu de votre zone de recherche</p>
-                        <div className="aspect-[16/9] bg-gray-200 rounded-lg flex items-center justify-center border border-dashed border-gray-400">
-                          <p className="text-gray-500">
-                            <MapPin className="h-8 w-8 mx-auto mb-2 text-car-blue" />
-                            {formData.city && formData.region ? (
-                              <>
-                                {formData.city}, {formData.region}<br />
-                                Rayon: {formData.radius} km
-                              </>
-                            ) : (
-                              "Veuillez sélectionner une localisation"
-                            )}
-                          </p>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-2">
-                          Dans le produit final, une carte interactive sera affichée ici
-                        </p>
+                {/* Options */}
+                <div className="space-y-4">
+                  <Label className="text-base font-medium">Options souhaitées</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {Object.entries(options).map(([key, value]) => (
+                      <div key={key} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={key}
+                          checked={value}
+                          onCheckedChange={() => handleOptionChange(key)}
+                        />
+                        <Label htmlFor={key} className="text-sm font-normal">
+                          {key === 'airConditioning' && 'Climatisation'}
+                          {key === 'leatherSeats' && 'Sièges cuir'}
+                          {key === 'sunroof' && 'Toit ouvrant'}
+                          {key === 'navigation' && 'Navigation GPS'}
+                          {key === 'bluetooth' && 'Bluetooth'}
+                          {key === 'parkingSensors' && 'Capteurs de parking'}
+                          {key === 'electricWindows' && 'Vitres électriques'}
+                          {key === 'heatedSeats' && 'Sièges chauffants'}
+                        </Label>
                       </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-between">
-                      <Button
-                        variant="outline"
-                        type="button"
-                        onClick={prevStep}
-                      >
-                        Retour
-                      </Button>
-                      <Button 
-                        className="car-button-gradient text-white"
-                        type="button"
-                        onClick={nextStep}
-                      >
-                        Suivant
-                      </Button>
-                    </CardFooter>
-                  </>
-                )}
+                    ))}
+                  </div>
+                </div>
 
-                {currentStep === 3 && (
-                  <>
-                    <CardHeader>
-                      <CardTitle>Finaliser votre recherche</CardTitle>
-                      <CardDescription>
-                        Vos coordonnées pour être contacté par les professionnels
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      {/* Informations de contact */}
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="name">Votre nom</Label>
-                          <Input 
-                            id="name" 
-                            placeholder="Ex: Jean Dupont" 
-                            value={formData.name}
-                            onChange={(e) => handleChange('name', e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="email">Email</Label>
-                          <Input 
-                            id="email" 
-                            type="email" 
-                            placeholder="votre@email.com" 
-                            value={formData.email}
-                            onChange={(e) => handleChange('email', e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="phone">Téléphone</Label>
-                          <Input 
-                            id="phone" 
-                            placeholder="Ex: 06 12 34 56 78" 
-                            value={formData.phone}
-                            onChange={(e) => handleChange('phone', e.target.value)}
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      {/* Résumé de la recherche */}
-                      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <h4 className="font-semibold mb-3">Résumé de votre recherche</h4>
-
-                        <div className="space-y-3 text-sm">
-                          {formData.category && (
-                            <div className="grid grid-cols-2 gap-1">
-                              <p className="text-gray-500">Catégorie:</p>
-                              <p>{formData.category}</p>
-                            </div>
-                          )}
-                          
-                          <div className="grid grid-cols-2 gap-1">
-                            <p className="text-gray-500">Véhicule:</p>
-                            <p>
-                              {formData.brand ? formData.brand : "Toutes marques"} 
-                              {formData.model ? ` ${formData.model}` : ""} 
-                              {formData.minYear && formData.maxYear && ` (${formData.minYear} - ${formData.maxYear})`}
-                            </p>
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-1">
-                            <p className="text-gray-500">Kilométrage max:</p>
-                            <p>{formData.maxKilometers.toLocaleString()} km</p>
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-1">
-                            <p className="text-gray-500">Budget max:</p>
-                            <p>{formData.budget.toLocaleString()} €</p>
-                          </div>
-                          
-                          {formData.options.length > 0 && (
-                            <div className="grid grid-cols-2 gap-1">
-                              <p className="text-gray-500">Options:</p>
-                              <p>
-                                {formData.options.map(opt => 
-                                  OPTIONS.find(o => o.id === opt)?.label
-                                ).join(', ')}
-                              </p>
-                            </div>
-                          )}
-                          
-                          <div className="grid grid-cols-2 gap-1">
-                            <p className="text-gray-500">Zone de recherche:</p>
-                            <p>{formData.city} ({formData.region && formData.region.split(' - ')[0]}) - {formData.radius} km</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 flex items-start">
-                        <svg className="w-6 h-6 text-blue-600 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <p className="text-sm text-blue-700">
-                          En finalisant votre recherche, vous acceptez que les professionnels de l'automobile dans votre zone vous contactent par email ou téléphone au sujet de véhicules correspondant à vos critères.
-                        </p>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-between">
-                      <Button
-                        variant="outline"
-                        type="button"
-                        onClick={prevStep}
-                      >
-                        Retour
-                      </Button>
-                      <Button 
-                        className="car-button-gradient text-white"
-                        type="submit"
-                      >
-                        Finaliser ma recherche
-                      </Button>
-                    </CardFooter>
-                  </>
-                )}
-              </Card>
-            </form>
-          </div>
+                {/* Additional Comments */}
+                <div className="space-y-2">
+                  <Label htmlFor="comments" className="text-base font-medium">
+                    Commentaires additionnels
+                  </Label>
+                  <Textarea
+                    id="comments"
+                    placeholder="Précisez d'autres critères ou informations importantes concernant votre recherche..."
+                    className="bg-white min-h-[120px]"
+                    value={additionalComments}
+                    onChange={(e) => setAdditionalComments(e.target.value)}
+                  />
+                </div>
+              </form>
+            </CardContent>
+            <CardFooter>
+              <Button 
+                onClick={handleSubmit} 
+                className="car-button-gradient w-full text-white text-lg py-6"
+              >
+                Lancer ma recherche
+              </Button>
+            </CardFooter>
+          </Card>
         </div>
       </div>
     </MainLayout>

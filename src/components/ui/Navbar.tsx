@@ -12,6 +12,9 @@ import {
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  // Check if user is logged in
+  const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
 
   return (
     <header className="bg-white shadow-sm py-4">
@@ -32,8 +35,10 @@ const Navbar = () => {
           </Link>
         </nav>
         <div className="hidden md:flex items-center gap-4">
-          <Button variant="outline">
-            Se connecter
+          <Button variant="outline" asChild>
+            <Link to="/connexion">
+              {isLoggedIn ? 'Mon compte' : 'Se connecter'}
+            </Link>
           </Button>
           <Button className="car-button-gradient text-white" asChild>
             <Link to="/recherche">
@@ -82,8 +87,14 @@ const Navbar = () => {
               <Button 
                 variant="outline" 
                 className="w-full mb-2"
+                asChild
               >
-                Se connecter
+                <Link 
+                  to="/connexion"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {isLoggedIn ? 'Mon compte' : 'Se connecter'}
+                </Link>
               </Button>
               <Button 
                 className="car-button-gradient text-white w-full"

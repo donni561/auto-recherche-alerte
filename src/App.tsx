@@ -10,6 +10,7 @@ import SearchForm from "./pages/SearchForm";
 import Confirmation from "./pages/Confirmation";
 import HowItWorksPage from "./pages/HowItWorks";
 import Professional from "./pages/Professional";
+import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/confirmation" element={<Confirmation />} />
           <Route path="/comment-ca-marche" element={<HowItWorksPage />} />
           <Route path="/professionnels" element={<Professional />} />
+          <Route path="/connexion" element={<Login />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -7,10 +7,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Briefcase, MapPin, Car, Users } from 'lucide-react';
+import { Briefcase, MapPin, Car, Users, Settings, Mail, Calendar } from 'lucide-react';
+import ContactsTable from '@/components/pro/ContactsTable';
+import FollowupScheduler from '@/components/pro/FollowupScheduler';
+import EmailTemplate from '@/components/pro/EmailTemplate';
+import { toast } from 'sonner';
 
 const Professional = () => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [showFollowupModal, setShowFollowupModal] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [selectedContactId, setSelectedContactId] = useState('');
+  const [selectedContactName, setSelectedContactName] = useState('');
+  const [selectedContactEmail, setSelectedContactEmail] = useState('');
   
   // Données de démonstration pour les demandes récentes
   const recentRequests = [
@@ -60,12 +69,118 @@ const Professional = () => {
     },
   ];
 
+  // Données CRM pour les clients/contacts
+  const [contacts, setContacts] = useState([
+    {
+      id: '1',
+      name: 'Sophie Martin',
+      email: 'sophie.martin@example.com',
+      phone: '06 12 34 56 78',
+      vehicle: 'SUV / Crossover - Peugeot 3008',
+      status: 'new',
+      lastContact: '—',
+      nextFollowup: ''
+    },
+    {
+      id: '2',
+      name: 'Thomas Dubois',
+      email: 'thomas.dubois@example.com',
+      phone: '06 23 45 67 89',
+      vehicle: 'Berline - Toutes marques',
+      status: 'contacted',
+      lastContact: 'Il y a 2 jours',
+      nextFollowup: 'Demain'
+    },
+    {
+      id: '3',
+      name: 'Julie Leroy',
+      email: 'julie.leroy@example.com',
+      phone: '06 34 56 78 90',
+      vehicle: 'Citadine - Renault Clio',
+      status: 'followup',
+      lastContact: 'Il y a 5 jours',
+      nextFollowup: 'Dans 3 jours'
+    },
+    {
+      id: '4',
+      name: 'Marc Bernard',
+      email: 'marc.bernard@example.com',
+      phone: '06 45 67 89 01',
+      vehicle: 'Break - Volkswagen Passat',
+      status: 'closed',
+      lastContact: 'Il y a 2 semaines',
+      nextFollowup: '—'
+    },
+  ]);
+
   // Données de démonstration pour les statistiques
   const stats = {
     totalRequests: 127,
     newRequests: 18,
     contactRate: '78%',
     satisfactionRate: '92%',
+  };
+
+  // Gérer l'ouverture du modal pour planifier une relance
+  const handleScheduleFollowup = (contactId) => {
+    const contact = contacts.find(c => c.id === contactId);
+    if (contact) {
+      setSelectedContactId(contactId);
+      setSelectedContactName(contact.name);
+      setShowFollowupModal(true);
+    }
+  };
+
+  // Gérer l'enregistrement d'une relance
+  const handleSaveFollowup = (contactId, date, note, method) => {
+    // Dans une application réelle, ceci appellerait une API
+    const updatedContacts = contacts.map(contact => {
+      if (contact.id === contactId) {
+        return {
+          ...contact,
+          status: 'followup',
+          nextFollowup: format(date, 'dd/MM/yyyy')
+        };
+      }
+      return contact;
+    });
+    
+    setContacts(updatedContacts);
+    toast.success(`Relance programmée pour ${format(date, 'dd/MM/yyyy')}`);
+  };
+
+  // Gérer l'ouverture du modal pour envoyer un email
+  const handleContact = (contactId) => {
+    const contact = contacts.find(c => c.id === contactId);
+    if (contact) {
+      setSelectedContactId(contactId);
+      setSelectedContactName(contact.name);
+      setSelectedContactEmail(contact.email);
+      setShowEmailModal(true);
+    }
+  };
+
+  // Gérer l'envoi d'un email
+  const handleSendEmail = (contactId, subject, message) => {
+    // Dans une application réelle, ceci appellerait une API
+    const updatedContacts = contacts.map(contact => {
+      if (contact.id === contactId) {
+        return {
+          ...contact,
+          status: 'contacted',
+          lastContact: 'Aujourd\'hui'
+        };
+      }
+      return contact;
+    });
+    
+    setContacts(updatedContacts);
+    toast.success('Email envoyé avec succès');
+  };
+
+  // Formater la date pour l'affichage
+  const format = (date, formatString) => {
+    return new Date(date).toLocaleDateString('fr-FR');
   };
 
   return (
@@ -96,6 +211,13 @@ const Professional = () => {
                     Demandes
                   </Button>
                   <Button 
+                    variant={activeTab === 'crm' ? "default" : "ghost"}
+                    className="w-full justify-start"
+                    onClick={() => setActiveTab('crm')}
+                  >
+                    CRM Clients
+                  </Button>
+                  <Button 
                     variant={activeTab === 'settings' ? "default" : "ghost"}
                     className="w-full justify-start"
                     onClick={() => setActiveTab('settings')}
@@ -121,9 +243,10 @@ const Professional = () => {
               <h1 className="text-2xl font-bold mb-6">Bienvenue sur votre espace professionnel</h1>
 
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="overview">Tableau de bord</TabsTrigger>
                   <TabsTrigger value="requests">Demandes</TabsTrigger>
+                  <TabsTrigger value="crm">CRM</TabsTrigger>
                   <TabsTrigger value="settings">Paramètres</TabsTrigger>
                 </TabsList>
                 
@@ -291,6 +414,142 @@ const Professional = () => {
                     </CardContent>
                   </Card>
                 </TabsContent>
+
+                <TabsContent value="crm" className="mt-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Gestion des contacts</CardTitle>
+                      <CardDescription>
+                        Gérez vos contacts clients et programmez des relances
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-6">
+                        <div className="flex justify-between">
+                          <div className="flex space-x-2">
+                            <Select defaultValue="all">
+                              <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Statut" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">Tous les statuts</SelectItem>
+                                <SelectItem value="new">Nouveaux</SelectItem>
+                                <SelectItem value="contacted">Contactés</SelectItem>
+                                <SelectItem value="followup">À relancer</SelectItem>
+                                <SelectItem value="closed">Terminés</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Input 
+                              placeholder="Rechercher un contact..." 
+                              className="w-[250px] bg-white"
+                            />
+                          </div>
+                          <Button className="car-button-gradient text-white">
+                            Nouveau contact
+                          </Button>
+                        </div>
+                        
+                        <ContactsTable 
+                          contacts={contacts}
+                          onContact={handleContact}
+                          onScheduleFollowup={handleScheduleFollowup}
+                        />
+                        
+                        <div className="flex justify-between items-center">
+                          <div className="text-sm text-gray-500">
+                            Affichage de {contacts.length} contacts
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button variant="outline" size="sm">Précédent</Button>
+                            <Button variant="outline" size="sm">Suivant</Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Emails automatiques</CardTitle>
+                        <CardDescription>
+                          Configurez des modèles d'emails pour votre communication
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-3 border rounded-md bg-white">
+                          <div className="font-medium">Premier contact</div>
+                          <p className="text-sm text-gray-600">Email envoyé au premier contact avec un prospect</p>
+                          <div className="mt-2 flex justify-end">
+                            <Button variant="outline" size="sm">Modifier</Button>
+                          </div>
+                        </div>
+                        
+                        <div className="p-3 border rounded-md bg-white">
+                          <div className="font-medium">Relance automatique</div>
+                          <p className="text-sm text-gray-600">Email de relance après 3 jours sans réponse</p>
+                          <div className="mt-2 flex justify-end">
+                            <Button variant="outline" size="sm">Modifier</Button>
+                          </div>
+                        </div>
+                        
+                        <div className="p-3 border rounded-md bg-white">
+                          <div className="font-medium">Proposition véhicule</div>
+                          <p className="text-sm text-gray-600">Email de proposition d'un véhicule correspondant</p>
+                          <div className="mt-2 flex justify-end">
+                            <Button variant="outline" size="sm">Modifier</Button>
+                          </div>
+                        </div>
+                        
+                        <Button variant="outline" className="w-full">
+                          <Mail className="mr-2 h-4 w-4" />
+                          Créer un nouveau modèle
+                        </Button>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Calendrier des relances</CardTitle>
+                        <CardDescription>
+                          Suivez vos prochaines actions de relance
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-3 border rounded-md bg-white">
+                          <div className="flex justify-between">
+                            <div>
+                              <div className="font-medium">Thomas Dubois</div>
+                              <p className="text-sm text-gray-600">Berline - Toutes marques</p>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-medium text-car-blue">Demain</div>
+                              <p className="text-sm text-gray-600">Email</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="p-3 border rounded-md bg-white">
+                          <div className="flex justify-between">
+                            <div>
+                              <div className="font-medium">Julie Leroy</div>
+                              <p className="text-sm text-gray-600">Citadine - Renault Clio</p>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-medium text-car-blue">Dans 3 jours</div>
+                              <p className="text-sm text-gray-600">Téléphone</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <Button variant="outline" className="w-full">
+                          <Calendar className="mr-2 h-4 w-4" />
+                          Voir toutes les relances
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
                 
                 <TabsContent value="settings" className="mt-6">
                   <Card>
@@ -344,6 +603,7 @@ const Professional = () => {
                             <SelectItem value="25">25 km</SelectItem>
                             <SelectItem value="50">50 km</SelectItem>
                             <SelectItem value="100">100 km</SelectItem>
+                            <SelectItem value="200">200 km</SelectItem>
                           </SelectContent>
                         </Select>
                         <p className="text-xs text-gray-500 mt-1">
@@ -362,6 +622,24 @@ const Professional = () => {
           </div>
         </div>
       </div>
+      
+      {/* Modals */}
+      <FollowupScheduler 
+        contactId={selectedContactId}
+        contactName={selectedContactName}
+        isOpen={showFollowupModal}
+        onClose={() => setShowFollowupModal(false)}
+        onSchedule={handleSaveFollowup}
+      />
+      
+      <EmailTemplate 
+        contactId={selectedContactId}
+        contactName={selectedContactName}
+        contactEmail={selectedContactEmail}
+        isOpen={showEmailModal}
+        onClose={() => setShowEmailModal(false)}
+        onSend={handleSendEmail}
+      />
     </MainLayout>
   );
 };
