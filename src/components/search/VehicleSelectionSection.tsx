@@ -72,7 +72,7 @@ const VehicleSelectionSection: React.FC<VehicleSelectionSectionProps> = ({
             <SelectValue placeholder="Toutes les marques" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Toutes les marques</SelectItem>
+            <SelectItem value="all_brands">Toutes les marques</SelectItem>
             {carBrands.map((brand) => (
               <SelectItem key={brand.value} value={brand.value}>
                 {brand.label}
@@ -83,7 +83,7 @@ const VehicleSelectionSection: React.FC<VehicleSelectionSectionProps> = ({
       </div>
     
       {/* Model - Only shown if brand is selected */}
-      {brand && (
+      {brand && brand !== 'all_brands' && (
         <div className="space-y-2">
           <Label htmlFor="model" className="text-base font-medium">
             Modèle
@@ -96,7 +96,7 @@ const VehicleSelectionSection: React.FC<VehicleSelectionSectionProps> = ({
               <SelectValue placeholder="Tous les modèles" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tous les modèles</SelectItem>
+              <SelectItem value="all_models">Tous les modèles</SelectItem>
               {filteredModels.map((model) => (
                 <SelectItem key={model.value} value={model.value}>
                   {model.label}

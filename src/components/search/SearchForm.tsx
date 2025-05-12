@@ -65,8 +65,8 @@ const SearchForm = () => {
     // Construct search data object
     const searchData = {
       category,
-      brand,
-      model,
+      brand: brand === 'all_brands' ? '' : brand,
+      model: model === 'all_models' ? '' : model,
       yearRange: [minYear, maxYear],
       priceRange: [minPrice, maxPrice],
       maxMileage,
