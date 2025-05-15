@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layouts/MainLayout';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,9 +10,6 @@ import {
   LayoutDashboardIcon,
   SettingsIcon,
   BellIcon,
-  CircleDotIcon,
-  CircleCheckIcon,
-  CalendarPlusIcon
 } from "lucide-react";
 
 import ProspectsList from '@/components/pro/ProspectsList';
@@ -21,13 +19,29 @@ import CrmSection from '@/components/pro/CrmSection';
 
 const Professional = () => {
   const [activeTab, setActiveTab] = useState("prospects");
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+    const isProfessional = sessionStorage.getItem('isProfessional') === 'true';
+    
+    if (!isLoggedIn || !isProfessional) {
+      toast.error('Vous devez être connecté en tant que professionnel pour accéder à cette page');
+      navigate('/connexion');
+    }
+  }, [navigate]);
 
   return (
     <MainLayout>
       <div className="bg-gray-50 min-h-screen py-6">
         <div className="container mx-auto px-4">
           <Card className="p-6">
-            <h1 className="text-2xl font-bold text-car-blue mb-6">Espace Professionnel</h1>
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-2xl font-bold text-car-blue">Espace Professionnel</h1>
+              <div className="text-sm text-gray-500">
+                Connecté en tant que <span className="font-semibold">Guillaume Peycli</span>
+              </div>
+            </div>
             
             <Tabs defaultValue="prospects" value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid grid-cols-4 mb-8">

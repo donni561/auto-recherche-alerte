@@ -34,6 +34,23 @@ const Login = () => {
       return;
     }
     
+    // Check for admin credentials
+    if (loginEmail === 'admin@autosearch.fr' && loginPassword === 'admin123') {
+      sessionStorage.setItem('isLoggedIn', 'true');
+      sessionStorage.setItem('isAdmin', 'true');
+      navigate('/admin');
+      return;
+    }
+    
+    // Check for professional credentials
+    if (loginEmail === 'guillaume.peycli@gmail.com' && loginPassword === 'guigui2003') {
+      toast.success('Connexion réussie!');
+      sessionStorage.setItem('isLoggedIn', 'true');
+      sessionStorage.setItem('isProfessional', 'true');
+      navigate('/professionnels');
+      return;
+    }
+    
     // Mock login logic - in a real app this would call an API
     toast.success('Connexion réussie!');
     
@@ -63,7 +80,7 @@ const Login = () => {
     }
     
     // Mock registration logic
-    toast.success('Compte créé avec succès!');
+    toast.success('Compte créé avec succès! Un email de confirmation a été envoyé à votre adresse.');
     
     // Switch to login tab
     setActiveTab('login');
