@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Calendar, Mail, Phone, MessageSquare } from "lucide-react";
+import { Calendar, Mail, Phone, MessageSquare, Bell } from "lucide-react";
 
 interface Prospect {
   id: string;
@@ -19,6 +19,7 @@ interface Prospect {
   budget: string;
   date: Date;
   status: 'new' | 'contacted' | 'followup' | 'closed';
+  isNew?: boolean;
 }
 
 const ProspectsList = () => {
@@ -31,7 +32,8 @@ const ProspectsList = () => {
       vehicle: "Peugeot 3008",
       budget: "25 000 € - 30 000 €",
       date: new Date(),
-      status: "new"
+      status: "new",
+      isNew: true
     },
     {
       id: "2",
@@ -59,6 +61,63 @@ const ProspectsList = () => {
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [contactMethod, setContactMethod] = useState<'email' | 'phone' | 'sms'>('email');
   const [contactNote, setContactNote] = useState('');
+  const [newProspectNotification, setNewProspectNotification] = useState(false);
+
+  // Simuler la réception de nouvelles recherches en temps réel
+  useEffect(() => {
+    // Fonction pour ajouter une nouvelle recherche
+    const addNewProspect = () => {
+      const newNames = ["Sophie Bernard", "Thomas Leroy", "Julie Moreau", "Nicolas Dubois"];
+      const newVehicles = ["BMW Série 3", "Audi A4", "Mercedes Classe C", "Volkswagen Golf"];
+      const newBudgets = ["30 000 € - 40 000 €", "20 000 € - 25 000 €", "35 000 € - 45 000 €"];
+      
+      const randomName = newNames[Math.floor(Math.random() * newNames.length)];
+      const randomVehicle = newVehicles[Math.floor(Math.random() * newVehicles.length)];
+      const randomBudget = newBudgets[Math.floor(Math.random() * newBudgets.length)];
+      
+      const newProspect: Prospect = {
+        id: Date.now().toString(),
+        name: randomName,
+        email: randomName.toLowerCase().replace(' ', '.') + "@example.com",
+        phone: "06 " + Math.floor(10000000 + Math.random() * 90000000).toString().match(/.{1,2}/g)!.join(' '),
+        vehicle: randomVehicle,
+        budget: randomBudget,
+        date: new Date(),
+        status: "new",
+        isNew: true
+      };
+      
+      setProspects(prev => [newProspect, ...prev]);
+      setNewProspectNotification(true);
+      
+      // Notification toast
+      toast.success("Nouvelle recherche reçue !", {
+        description: `${randomName} recherche ${randomVehicle}`,
+        action: {
+          label: "Voir",
+          onClick: () => setNewProspectNotification(false)
+        }
+      });
+      
+      // Désactiver la notification "isNew" après 30 secondes
+      setTimeout(() => {
+        setProspects(prev => 
+          prev.map(p => p.id === newProspect.id ? { ...p, isNew: false } : p)
+        );
+      }, 30000);
+    };
+    
+    // Simuler une nouvelle recherche toutes les 45-90 secondes
+    const timer = setTimeout(addNewProspect, Math.random() * 45000 + 45000);
+    
+    // Pour la démo, ajoutons aussi une recherche après 5 secondes
+    const initialTimer = setTimeout(addNewProspect, 5000);
+    
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(initialTimer);
+    };
+  }, [prospects]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -78,6 +137,16 @@ const ProspectsList = () => {
   const handleContact = (prospect: Prospect) => {
     setSelectedProspect(prospect);
     setContactDialogOpen(true);
+    
+    // Si c'est un nouveau prospect, on désactive la notification
+    if (prospect.isNew) {
+      setProspects(prev => 
+        prev.map(p => p.id === prospect.id ? { ...p, isNew: false } : p)
+      );
+      if (!prospects.some(p => p.id !== prospect.id && p.isNew)) {
+        setNewProspectNotification(false);
+      }
+    }
   };
 
   const handleSubmitContact = () => {
@@ -97,10 +166,18 @@ const ProspectsList = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Demandes de prospects</h2>
-        <Button className="car-button-gradient text-white">Exporter</Button>
+        <div className="flex items-center gap-3">
+          {newProspectNotification && (
+            <div className="animate-pulse flex items-center text-green-500">
+              <Bell className="h-5 w-5 mr-1" />
+              <span>Nouvelles demandes</span>
+            </div>
+          )}
+          <Button className="car-button-gradient text-white">Exporter</Button>
+        </div>
       </div>
 
       <Table>
@@ -116,9 +193,17 @@ const ProspectsList = () => {
         </TableHeader>
         <TableBody>
           {prospects.map((prospect) => (
-            <TableRow key={prospect.id}>
+            <TableRow 
+              key={prospect.id}
+              className={prospect.isNew ? "bg-green-50" : ""}
+            >
               <TableCell>
-                <div className="font-medium">{prospect.name}</div>
+                <div className="font-medium flex items-center">
+                  {prospect.name}
+                  {prospect.isNew && (
+                    <Badge className="ml-2 bg-green-500 animate-pulse">Nouveau</Badge>
+                  )}
+                </div>
                 <div className="text-sm text-gray-500">{prospect.email}</div>
                 <div className="text-sm text-gray-500">{prospect.phone}</div>
               </TableCell>

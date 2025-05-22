@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import ConfirmationEmail from '@/components/auth/ConfirmationEmail';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -24,6 +25,10 @@ const Login = () => {
   const [registerName, setRegisterName] = useState('');
   const [registerPhone, setRegisterPhone] = useState('');
   const [isProfessional, setIsProfessional] = useState(false);
+  
+  // Email preview state
+  const [showEmailPreview, setShowEmailPreview] = useState(false);
+  const [confirmationLink, setConfirmationLink] = useState('');
   
   const handleLogin = (e) => {
     e.preventDefault();
@@ -79,10 +84,30 @@ const Login = () => {
       return;
     }
     
+    // Generate confirmation link
+    const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const link = `https://carsearch.live/confirmation?token=${token}&email=${encodeURIComponent(registerEmail)}`;
+    setConfirmationLink(link);
+    
+    // Simulate sending email by showing preview
+    setShowEmailPreview(true);
+    
+    // In a real app, you would send the email via an API call here
+    console.log("Enregistrement utilisateur:", {
+      name: registerName,
+      email: registerEmail,
+      phone: registerPhone,
+      isProfessional,
+      confirmationLink: link
+    });
+    
     // Mock registration logic
     toast.success('Compte créé avec succès! Un email de confirmation a été envoyé à votre adresse.');
-    
-    // Switch to login tab
+  };
+
+  const handleCloseEmailPreview = () => {
+    setShowEmailPreview(false);
+    // Switch to login tab as if the email was actually sent
     setActiveTab('login');
     setLoginEmail(registerEmail);
   };
@@ -234,6 +259,29 @@ const Login = () => {
           </Card>
         </div>
       </div>
+      
+      {/* Email Preview Modal */}
+      {showEmailPreview && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-auto">
+            <div className="p-4 border-b flex justify-between items-center">
+              <h2 className="text-xl font-bold">Aperçu de l'email de confirmation</h2>
+              <Button variant="ghost" onClick={handleCloseEmailPreview}>✕</Button>
+            </div>
+            <div className="p-4">
+              <p className="mb-4 text-sm text-gray-500">
+                Dans un environnement de production, cet email serait envoyé automatiquement via un service comme SendGrid, Mailjet ou Amazon SES.
+              </p>
+              <div className="border rounded">
+                <ConfirmationEmail name={registerName} confirmationLink={confirmationLink} />
+              </div>
+            </div>
+            <div className="p-4 border-t flex justify-end">
+              <Button onClick={handleCloseEmailPreview}>Fermer</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </MainLayout>
   );
 };

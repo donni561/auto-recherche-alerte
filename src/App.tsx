@@ -12,6 +12,7 @@ import HowItWorksPage from "./pages/HowItWorks";
 import Professional from "./pages/Professional";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
+import AdminExtranet from "./pages/AdminExtranet";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/professionnels" element={<Professional />} />
           <Route path="/connexion" element={<Login />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/extranet" element={<AdminExtranet />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
